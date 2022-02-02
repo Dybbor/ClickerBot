@@ -3,6 +3,7 @@
 
 
 ClickBot::ClickBot() {
+    //default points for fullscreen 1920 x 1080
     m_workers.at(0) = POINT{ 621,550 };
     m_workers.at(1) = POINT{ 771,438 };
     m_workers.at(2) = POINT{ 737,620 };
@@ -19,15 +20,9 @@ ClickBot::ClickBot() {
     m_restart_office = POINT{1080,800};
     m_invite_workers = POINT{ 1302, 292 };
     m_exit = false;
-    m_count_restart_office = 0;
-    start();
-   
+    m_count_restart_office = 0;   
 }
-ClickBot::ClickBot(std::array<POINT, 11> workers, POINT upgrade_workers, POINT ascend) {
-    m_workers = workers;
-    m_upgrade_worker = upgrade_workers;
-    m_open_m_restart_office = ascend;
-}
+
 
 
 ClickBot::~ClickBot() {
@@ -35,16 +30,27 @@ ClickBot::~ClickBot() {
 }
 
 
-/////////////////////////////////////////
-// need to add all points!!!!!!!!!!!!
-//////////////////////////////////////
 void ClickBot::getPointsFromClick() {
     int i = 0;
+    std::cout << "click to 11 workers" << std::endl;
     for (auto& table : m_workers) {
         table = utility.getClickPosMouse();
     }
+    std::cout << "button upgrade worker" << std::endl;
     m_upgrade_worker = utility.getClickPosMouse();
+    std::cout << "open menu restart office" << std::endl;
     m_open_m_restart_office = utility.getClickPosMouse();
+    std::cout << "button restart office" << std::endl;
+    m_restart_office = utility.getClickPosMouse();
+    std::cout << "Are u ready to write point invite_workers ?   \n1-YEEEEEEEEEEEEEEEP" << std::endl;
+    while (1) {
+        if (GetAsyncKeyState(KEY_1)) {
+            m_invite_workers = utility.getClickPosMouse();
+            break;
+        }
+    }
+    system("cls");
+    std::cout << "invite point was writed!" << std::endl;
     Printworkers();
 }
 
@@ -66,17 +72,15 @@ void ClickBot::inviteWorkers() {
 
 void ClickBot::restartOffice() {
     if (!m_exit) {
-        std::cout << "restart office" << std::endl;
         utility.clickLeftMouse(m_open_m_restart_office, 20);
         utility.clickLeftMouse(m_restart_office, 20);
         m_count_restart_office++;
-        std::cout << m_count_restart_office << std::endl;
+        std::cout << "restart office " << m_count_restart_office << " times" << std::endl;
     }
 }
 
 void ClickBot::upgradeWorker(POINT worker, int count_click) {
     if (!m_exit) {
-        std::cout << "upgradeWorker" << std::endl;
         utility.clickLeftMouse(worker, 300);
         Sleep(200);
         utility.clickLeftMouse(m_upgrade_worker, 200);
@@ -94,7 +98,6 @@ void ClickBot::upgradeWorker(POINT worker, int count_click) {
 
 void ClickBot::upgradeMaxLvlWorkers() {
     if (!m_exit) {
-        std::cout << "upgradeMaxLvlWorkers" << std::endl;
         for (int i = 0; (i < 11) && (!m_exit); ++i) {
             utility.clickLeftMouse(m_workers.at(i), 20);
             utility.clickLeftMouse(m_upgrade_worker, 20);
@@ -113,6 +116,21 @@ void ClickBot::scriptOverfarm() {
 }
 
 void ClickBot::start() {
+    std::cout << "Used default points ?   \n1-YES   \n2-NO "<< std::endl;
+    while (1) {
+        if (GetAsyncKeyState(KEY_1)) {
+            std::cout << "will be used default points" << std::endl;
+            break;
+        }
+        if (GetAsyncKeyState(KEY_2)) {
+            std::cout << "start to click " << std::endl;
+            getPointsFromClick();
+            break;
+        }
+    }
+
+    std::cout << "G - start bot\nF -  stop bot" << std::endl;
+    // async thread for tracking key exit
     std::future<bool> triggerExit = std::async(std::launch::async, [&m_exit = m_exit]() {
         while (1) {
             if (GetKeyState(KEY_F)) {
@@ -127,12 +145,11 @@ void ClickBot::start() {
         if (GetAsyncKeyState(KEY_G)) { // start bot
             std::cout << "bot working" << std::endl;
             scriptOverfarm();
-            triggerExit.get();
+            triggerExit.wait();
         }
     }
-    std::cout << "bot closed" << std::endl;
+    std::cout << "bot stoped" << std::endl;
 }
-
 
 //must be delete 
 void ClickBot::Printworkers() {
@@ -142,5 +159,7 @@ void ClickBot::Printworkers() {
         ++i;
     }
     std::cout << "upgrade workers " << m_upgrade_worker.x << ":" << m_upgrade_worker.y << std::endl;;
-    std::cout << "upgrade company " << m_open_m_restart_office.x << ":" << m_open_m_restart_office.y << std::endl;;
+    std::cout << "open restart office " << m_open_m_restart_office.x << ":" << m_open_m_restart_office.y << std::endl;;
+    std::cout << "restart office " << m_restart_office.x << m_restart_office.x << " : " << m_restart_office.y << std::endl;
+    std::cout << "invite workers " << m_invite_workers.x << " : " << m_invite_workers.y << std::endl;
 }

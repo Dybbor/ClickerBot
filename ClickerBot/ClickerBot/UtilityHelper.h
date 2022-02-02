@@ -45,7 +45,6 @@
 
 
 class UtilityHelper {
-    private: POINT m_point;
     public: 
         UtilityHelper();
         void clickLeftMouse(POINT point, int sleep_time = 100);

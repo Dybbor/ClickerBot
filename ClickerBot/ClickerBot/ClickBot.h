@@ -16,7 +16,6 @@ private:
     bool m_exit;
 public:
     ClickBot();
-    ClickBot(std::array<POINT, 11> workers, POINT upgrade_workers, POINT ascend);
     void start();
     ~ClickBot();
 private:
