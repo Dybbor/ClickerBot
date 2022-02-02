@@ -49,83 +49,88 @@ void ClickBot::getPointsFromClick() {
 }
 
 void ClickBot::inviteWorkers() {
-    Sleep(2000);
-    utility.clickLeftMouse(m_workers.at(10), 20);
-    utility.clickLeftMouse(m_invite_workers, 20);
-    //need to click anywhere to hide ads
-    utility.clickLeftMouse(m_workers.at(10), 1000);
-    //need to invite 2 times, because not enough money on start level
-    utility.clickLeftMouse(m_workers.at(10), 20);
-    utility.clickLeftMouse(m_invite_workers, 20);
-    Sleep(500);
-    utility.clickLeftMouse(m_workers.at(10), 20);
+    if (!m_exit) {
+        Sleep(2000);
+        utility.clickLeftMouse(m_workers.at(10), 20);
+        utility.clickLeftMouse(m_invite_workers, 20);
+        //need to click anywhere to hide ads
+        utility.clickLeftMouse(m_workers.at(10), 1000);
+        //need to invite 2 times, because not enough money on start level
+        utility.clickLeftMouse(m_workers.at(10), 20);
+        utility.clickLeftMouse(m_invite_workers, 20);
+        Sleep(500);
+        utility.clickLeftMouse(m_workers.at(10), 20);
+    }
 }
 
 
 void ClickBot::restartOffice() {
-    utility.clickLeftMouse(m_open_m_restart_office, 20);
-    utility.clickLeftMouse(m_restart_office, 20);
-    m_count_restart_office++;
-    std::cout << m_count_restart_office << std::endl;
+    if (!m_exit) {
+        std::cout << "restart office" << std::endl;
+        utility.clickLeftMouse(m_open_m_restart_office, 20);
+        utility.clickLeftMouse(m_restart_office, 20);
+        m_count_restart_office++;
+        std::cout << m_count_restart_office << std::endl;
+    }
 }
 
 void ClickBot::upgradeWorker(POINT worker, int count_click) {
-    utility.clickLeftMouse(worker, 300);
-    Sleep(200);
-    utility.clickLeftMouse(m_upgrade_worker, 200);
-    utility.clickLeftMouse(worker, 200);
-    utility.clickLeftMouse(m_upgrade_worker, 200);
-    utility.holdLeftMouse(m_upgrade_worker, 5000);
-    for (int i = 0; (i < count_click) && (!m_exit); ++i) {
-        utility.clickLeftMouse(worker, 20);
-        if (GetAsyncKeyState(KEY_F)) {
-            m_exit = true;
+    if (!m_exit) {
+        std::cout << "upgradeWorker" << std::endl;
+        utility.clickLeftMouse(worker, 300);
+        Sleep(200);
+        utility.clickLeftMouse(m_upgrade_worker, 200);
+        utility.clickLeftMouse(worker, 200);
+        utility.clickLeftMouse(m_upgrade_worker, 200);
+        utility.holdLeftMouse(m_upgrade_worker, 5000);
+        for (int i = 0; (i < count_click) && (!m_exit); ++i) {
+            utility.clickLeftMouse(worker, 20);
         }
-    }
-    for (int i = 0; (i < 5) && (!m_exit); ++i) {
-        utility.clickLeftMouse(m_upgrade_worker, 20);
-        if (GetAsyncKeyState(KEY_F)) {
-            m_exit = true;
+        for (int i = 0; (i < 5) && (!m_exit); ++i) {
+            utility.clickLeftMouse(m_upgrade_worker, 20);
         }
-    }
-    if (GetAsyncKeyState(KEY_F)) {
-        m_exit = true;
     }
 }
 
 void ClickBot::upgradeMaxLvlWorkers() {
-    for (int i = 0; (i < 11) && (!m_exit); ++i) {
-        utility.clickLeftMouse(m_workers.at(i), 20);
-        utility.clickLeftMouse(m_upgrade_worker, 20);
-        if (GetAsyncKeyState(KEY_F)) {
-            m_exit = true;
+    if (!m_exit) {
+        std::cout << "upgradeMaxLvlWorkers" << std::endl;
+        for (int i = 0; (i < 11) && (!m_exit); ++i) {
+            utility.clickLeftMouse(m_workers.at(i), 20);
+            utility.clickLeftMouse(m_upgrade_worker, 20);
         }
     }
 
 }
 void ClickBot::scriptOverfarm() {
     while (!m_exit) {
-   /*     if (GetAsyncKeyState(KEY_G)) {
-            upgradeWorker(m_workers.at(10), 20);
-            upgradeWorker(m_workers.at(0), 20);
-            upgradeMaxLvlWorkers();
-            restartOffice();
-            inviteWorkers();
-        }*/
-      //  upgradeWorker(m_workers.at(9), 20);
         upgradeWorker(m_workers.at(10), 20);
         upgradeWorker(m_workers.at(0), 20);
         upgradeMaxLvlWorkers();
         restartOffice();
         inviteWorkers();
-        if (GetAsyncKeyState(KEY_F)) {
-            m_exit = true;
-        }
     }
 }
 
 void ClickBot::start() {
-    scriptOverfarm();
+    std::future<bool> triggerExit = std::async(std::launch::async, [&m_exit = m_exit]() {
+        while (1) {
+            if (GetKeyState(KEY_F)) {
+                std::cout << "exit ..." << std::endl;
+                m_exit = true;
+                break;
+            }
+        }
+        return true;
+        });
+    while (!m_exit) {
+        if (GetAsyncKeyState(KEY_G)) { // start bot
+            std::cout << "bot working" << std::endl;
+            scriptOverfarm();
+            triggerExit.get();
+        }
+    }
+    std::cout << "bot closed" << std::endl;
 }
 
 

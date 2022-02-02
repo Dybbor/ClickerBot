@@ -1,5 +1,6 @@
 #pragma once
 #include <array>
+#include <future>
 #include "UtilityHelper.h"
 
 class ClickBot
